@@ -41,6 +41,15 @@ rec {
     persistencedSha256 = "sha256-Vz33gNYapQ4++hMqH3zBB4MyjxLxwasvLzUJsCcyY4k=";
   };
 
+  grid = generic rec {
+    version = "550.54.14";
+    url = "https://storage.googleapis.com/nvidia-drivers-us-public/GRID/vGPU17.0/NVIDIA-Linux-x86_64-${version}-grid.run";
+    sha256_64bit = "1qwrij3h3hbkwpdslpyp1navp9jz9ik0xx5k9ni4biafw4bv2702";
+    settingsVersion = "555.58.02";
+    settingsSha256 = "sha256-ZpuVZybW6CFN/gz9rx+UJvQ715FZnAOYfHn5jt5Z2C8=";
+    usePersistenced = false;
+  };
+
   latest = selectHighestVersion production (generic {
     version = "555.58.02";
     sha256_64bit = "sha256-xctt4TPRlOJ6r5S54h5W6PT6/3Zy2R4ASNFPu8TSHKM=";

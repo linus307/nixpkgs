@@ -244,7 +244,7 @@ in
 
       package = lib.mkOption {
         default =
-          config.boot.kernelPackages.nvidiaPackages."${if cfg.datacenter.enable then "dc" else "stable"}";
+          config.boot.kernelPackages.nvidiaPackages."${if cfg.datacenter.enable then "dc" else (if cfg.vgpu.enable then "grid" else "stable")}";
         defaultText = lib.literalExpression ''
           config.boot.kernelPackages.nvidiaPackages."\$\{if cfg.datacenter.enable then "dc" else "stable"}"
         '';
@@ -258,6 +258,12 @@ in
         the open source NVIDIA kernel module
       '' // {
         defaultText = lib.literalExpression ''lib.versionAtLeast config.hardware.nvidia.package.version "560"'';
+      };
+
+      vgpu = {
+        enable = lib.mkEnableOption ''
+          Enable vgpu driver and services.
+        '';
       };
     };
   };
@@ -659,6 +665,18 @@ in
                     PIDFile = "/var/run/nvidia-persistenced/nvidia-persistenced.pid";
                     ExecStart = "${lib.getExe nvidia_x11.persistenced} --verbose";
                     ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-persistenced";
+                  };
+                };
+              })
+              (lib.mkIf cfg.vgpu.enable {
+                "nvidia-gridd" = {
+                  description = "NVIDIA Grid Daemon";
+                  wantedBy = [ "multi-user.target" ];
+                  unitConfig.After = [ "network-online.target" "systemd-resolved.service" ];
+                  serviceConfig = {
+                    Type = "forking";
+                    ExecStart = "${nvidia_x11.bin}/bin/nvidia-gridd --verbose";
+                    ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-gridd";
                   };
                 };
               })
